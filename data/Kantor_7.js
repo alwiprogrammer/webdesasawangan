@@ -1,0 +1,1 @@
+var json_Kantor_7 = {"type":"FeatureCollection","name":"Kantor_7","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"id":"1","Nama":"Kantor Kelurahan Desa Sawangan"},"geometry":{"type":"Point","coordinates":[109.09450432616373,-7.431145501286729]}}]}

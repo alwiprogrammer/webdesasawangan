@@ -1,0 +1,1 @@
+var json_Rumah_10 = {"type":"FeatureCollection","name":"Rumah_10","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"id":"1","Nama":"Rumah Muhamad Alwi"},"geometry":{"type":"Point","coordinates":[109.089726801075372,-7.432244815565671]}}]}

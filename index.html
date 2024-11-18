@@ -1,0 +1,3134 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet-svg-shape-markers.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="data/ADMINISTRASIDESA_AR_25K_0.js"></script>
+        <script src="data/Hutan_1.js"></script>
+        <script src="data/Persawahan_2.js"></script>
+        <script src="data/BATASRW_3.js"></script>
+        <script src="data/BATASDESA_4.js"></script>
+        <script src="data/Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5.js"></script>
+        <script src="data/JALANDESA_6.js"></script>
+        <script src="data/Kantor_7.js"></script>
+        <script src="data/Pendidikan_8.js"></script>
+        <script src="data/RumahKetua_9.js"></script>
+        <script src="data/Rumah_10.js"></script>
+        <script src="data/Kesehatan_11.js"></script>
+        <script src="data/TempatIbadah_12.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString' || e.target.feature.geometry.type === 'MultiLineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-7.4555202746057185,109.07114356747198],[-7.419806942052405,109.13849227038224]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        function pop_ADMINISTRASIDESA_AR_25K_0(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDPPUM'] !== null ? autolinker.link(feature.properties['KDPPUM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(feature.properties['NAMOBJ'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['REMARK'] !== null ? autolinker.link(feature.properties['REMARK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDPBPS'] !== null ? autolinker.link(feature.properties['KDPBPS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FCODE'] !== null ? autolinker.link(feature.properties['FCODE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LUASWH'] !== null ? autolinker.link(feature.properties['LUASWH'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['UUPP'] !== null ? autolinker.link(feature.properties['UUPP'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SRS_ID'] !== null ? autolinker.link(feature.properties['SRS_ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LCODE'] !== null ? autolinker.link(feature.properties['LCODE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['METADATA'] !== null ? autolinker.link(feature.properties['METADATA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDEBPS'] !== null ? autolinker.link(feature.properties['KDEBPS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDEPUM'] !== null ? autolinker.link(feature.properties['KDEPUM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDCBPS'] !== null ? autolinker.link(feature.properties['KDCBPS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDCPUM'] !== null ? autolinker.link(feature.properties['KDCPUM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDBBPS'] !== null ? autolinker.link(feature.properties['KDBBPS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDBPUM'] !== null ? autolinker.link(feature.properties['KDBPUM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKD'] !== null ? autolinker.link(feature.properties['WADMKD'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WIADKD'] !== null ? autolinker.link(feature.properties['WIADKD'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKC'] !== null ? autolinker.link(feature.properties['WADMKC'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WIADKC'] !== null ? autolinker.link(feature.properties['WIADKC'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKK'] !== null ? autolinker.link(feature.properties['WADMKK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WIADKK'] !== null ? autolinker.link(feature.properties['WIADKK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMPR'] !== null ? autolinker.link(feature.properties['WADMPR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WIADPR'] !== null ? autolinker.link(feature.properties['WIADPR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TIPADM'] !== null ? autolinker.link(feature.properties['TIPADM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Leng'] !== null ? autolinker.link(feature.properties['SHAPE_Leng'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Area'] !== null ? autolinker.link(feature.properties['SHAPE_Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ADMINISTRASIDESA_AR_25K_0_0(feature) {
+            switch(String(feature.properties['NAMOBJ'])) {
+                case 'Sawangan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_0',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(243,209,96,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_ADMINISTRASIDESA_AR_25K_0');
+        map.getPane('pane_ADMINISTRASIDESA_AR_25K_0').style.zIndex = 400;
+        map.getPane('pane_ADMINISTRASIDESA_AR_25K_0').style['mix-blend-mode'] = 'normal';
+        var layer_ADMINISTRASIDESA_AR_25K_0 = new L.geoJson(json_ADMINISTRASIDESA_AR_25K_0, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ADMINISTRASIDESA_AR_25K_0',
+            layerName: 'layer_ADMINISTRASIDESA_AR_25K_0',
+            pane: 'pane_ADMINISTRASIDESA_AR_25K_0',
+            onEachFeature: pop_ADMINISTRASIDESA_AR_25K_0,
+            style: style_ADMINISTRASIDESA_AR_25K_0_0,
+        });
+        bounds_group.addLayer(layer_ADMINISTRASIDESA_AR_25K_0);
+        map.addLayer(layer_ADMINISTRASIDESA_AR_25K_0);
+        function pop_Hutan_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Hutan'] !== null ? autolinker.link(feature.properties['Hutan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Hutan_1_0() {
+            return {
+                pane: 'pane_Hutan_1',
+                opacity: 1,
+                color: 'rgba(56,128,54,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(16,138,12,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Hutan_1');
+        map.getPane('pane_Hutan_1').style.zIndex = 401;
+        map.getPane('pane_Hutan_1').style['mix-blend-mode'] = 'normal';
+        var layer_Hutan_1 = new L.geoJson(json_Hutan_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Hutan_1',
+            layerName: 'layer_Hutan_1',
+            pane: 'pane_Hutan_1',
+            onEachFeature: pop_Hutan_1,
+            style: style_Hutan_1_0,
+        });
+        bounds_group.addLayer(layer_Hutan_1);
+        map.addLayer(layer_Hutan_1);
+        function pop_Persawahan_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Sawah'] !== null ? autolinker.link(feature.properties['Sawah'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Persawahan_2_0() {
+            return {
+                pane: 'pane_Persawahan_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(51,160,44,1.0)',
+                interactive: true,
+            }
+        }
+        function style_Persawahan_2_1() {
+            return {
+                pane: 'pane_Persawahan_2',
+                interactive: true,
+            }
+        }
+        function style_Persawahan_2_2() {
+            return {
+                pane: 'pane_Persawahan_2',
+                opacity: 1,
+                color: 'rgba(51,160,44,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 1.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Persawahan_2');
+        map.getPane('pane_Persawahan_2').style.zIndex = 402;
+        map.getPane('pane_Persawahan_2').style['mix-blend-mode'] = 'normal';
+        var layer_Persawahan_2 = new L.geoJson.multiStyle(json_Persawahan_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Persawahan_2',
+            layerName: 'layer_Persawahan_2',
+            pane: 'pane_Persawahan_2',
+            onEachFeature: pop_Persawahan_2,
+            styles: [style_Persawahan_2_0,style_Persawahan_2_1,style_Persawahan_2_2,]
+        });
+        bounds_group.addLayer(layer_Persawahan_2);
+        map.addLayer(layer_Persawahan_2);
+        function pop_BATASRW_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['RT'] !== null ? autolinker.link(feature.properties['RT'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_BATASRW_3_0(feature) {
+            switch(String(feature.properties['RT'])) {
+                case 'RT 05 RW 01':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,240,217,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 05':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,239,214,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 01':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,237,211,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 05':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,236,208,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 01':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,234,205,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 05':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,233,202,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 01':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,232,199,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 05':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,230,196,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 01':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,229,192,1.0)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,227,189,1.0)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,226,186,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 02':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,225,183,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 03':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,223,180,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 04':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,222,177,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 06':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,220,174,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 07':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,219,171,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 08':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,218,168,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 09':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,216,165,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 10':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,215,162,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 11':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,213,159,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 01 RW 12':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,212,156,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 02':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,211,153,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 03':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,209,150,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 04':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,208,146,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 06':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,206,143,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 07':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,205,140,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 08':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,203,138,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 09':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,201,136,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 10':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,198,134,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 11':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,196,132,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 02 RW 12':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,194,130,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 02':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,191,128,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 03':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,189,126,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 04':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,186,124,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 06':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,184,122,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 07':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,181,120,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 08':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,179,118,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 09':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,176,117,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 10':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,174,115,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 11':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,172,113,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 03 RW 12':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,169,111,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 02':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,167,109,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 03':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,164,107,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 04':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,162,105,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 06':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,159,103,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 07':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,157,101,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 08':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,154,99,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 09':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,152,98,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 04 RW 12':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,150,96,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 05 RW 02':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,147,94,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 05 RW 03':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,145,92,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 05 RW 04':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,142,90,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 05 RW 12':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,140,88,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '1':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(251,137,87,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '2':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(250,134,85,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '3':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(249,132,84,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '4':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(248,129,82,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '5':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,127,81,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '6':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(246,124,79,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '7':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(245,121,78,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '8':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(244,119,76,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '9':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(243,116,75,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '10':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(242,114,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '11':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(241,111,72,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '12':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(240,108,71,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '13':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(239,106,69,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '14':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(238,103,68,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '15':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,101,66,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '16':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(236,98,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '17':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(235,95,63,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '18':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(234,93,62,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '19':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(233,90,60,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '20':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(232,88,59,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '21':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(231,85,57,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '22':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(230,82,56,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '23':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,80,54,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '24':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(228,77,53,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '25':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,75,51,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '26':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(226,72,50,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '27':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(224,69,48,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '28':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(222,66,46,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '29':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,63,44,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '30':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(218,60,42,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '31':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(216,57,40,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '32':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(214,55,38,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '33':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(213,52,36,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '34':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(211,49,34,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '35':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(209,46,32,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '36':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(207,43,30,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '37':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(205,40,28,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '38':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(203,37,26,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '39':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(201,34,24,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '40':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(200,32,22,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '41':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(198,29,20,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '42':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(196,26,18,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '43':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(194,23,16,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '44':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(192,20,14,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '45':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(190,17,12,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '46':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(188,14,10,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '47':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(186,11,8,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '48':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(185,9,6,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '49':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(183,6,4,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '50':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(181,3,2,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '51':
+                    return {
+                pane: 'pane_BATASRW_3',
+                opacity: 1,
+                color: 'rgba(128,14,16,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,0,0,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_BATASRW_3');
+        map.getPane('pane_BATASRW_3').style.zIndex = 403;
+        map.getPane('pane_BATASRW_3').style['mix-blend-mode'] = 'normal';
+        var layer_BATASRW_3 = new L.geoJson(json_BATASRW_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BATASRW_3',
+            layerName: 'layer_BATASRW_3',
+            pane: 'pane_BATASRW_3',
+            onEachFeature: pop_BATASRW_3,
+            style: style_BATASRW_3_0,
+        });
+        bounds_group.addLayer(layer_BATASRW_3);
+        map.addLayer(layer_BATASRW_3);
+        function pop_BATASDESA_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['RW'] !== null ? autolinker.link(feature.properties['RW'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_BATASDESA_4_0(feature) {
+            switch(String(feature.properties['RW'])) {
+                case '01':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(176,99,6,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '02':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(162,91,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '03':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(147,84,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '04':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(133,76,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '05':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(119,68,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '06':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(105,60,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '07':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(91,52,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '08':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(76,44,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '09':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(62,36,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '10':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(48,29,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '11':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(33,21,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case '12':
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(19,13,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_BATASDESA_4',
+                opacity: 1,
+                color: 'rgba(5,5,5,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_BATASDESA_4');
+        map.getPane('pane_BATASDESA_4').style.zIndex = 404;
+        map.getPane('pane_BATASDESA_4').style['mix-blend-mode'] = 'normal';
+        var layer_BATASDESA_4 = new L.geoJson(json_BATASDESA_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BATASDESA_4',
+            layerName: 'layer_BATASDESA_4',
+            pane: 'pane_BATASDESA_4',
+            onEachFeature: pop_BATASDESA_4,
+            style: style_BATASDESA_4_0,
+        });
+        bounds_group.addLayer(layer_BATASDESA_4);
+        map.addLayer(layer_BATASDESA_4);
+        function pop_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? autolinker.link(feature.properties['osm_id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_type'] !== null ? autolinker.link(feature.properties['osm_type'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['health_fac'] !== null ? autolinker.link(feature.properties['health_fac'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['office'] !== null ? autolinker.link(feature.properties['office'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['operator_t'] !== null ? autolinker.link(feature.properties['operator_t'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['roof_mater'] !== null ? autolinker.link(feature.properties['roof_mater'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['tourism'] !== null ? autolinker.link(feature.properties['tourism'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['rooms'] !== null ? autolinker.link(feature.properties['rooms'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['amenity'] !== null ? autolinker.link(feature.properties['amenity'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? autolinker.link(feature.properties['name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['staff_coun'] !== null ? autolinker.link(feature.properties['staff_coun'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['access'] !== null ? autolinker.link(feature.properties['access'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['beds'] !== null ? autolinker.link(feature.properties['beds'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['landuse'] !== null ? autolinker.link(feature.properties['landuse'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['staff_co_1'] !== null ? autolinker.link(feature.properties['staff_co_1'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['opening_ho'] !== null ? autolinker.link(feature.properties['opening_ho'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['access_roo'] !== null ? autolinker.link(feature.properties['access_roo'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['building_m'] !== null ? autolinker.link(feature.properties['building_m'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['healthcare'] !== null ? autolinker.link(feature.properties['healthcare'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['government'] !== null ? autolinker.link(feature.properties['government'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['isced_leve'] !== null ? autolinker.link(feature.properties['isced_leve'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['denominati'] !== null ? autolinker.link(feature.properties['denominati'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['historic'] !== null ? autolinker.link(feature.properties['historic'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['status'] !== null ? autolinker.link(feature.properties['status'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['leisure'] !== null ? autolinker.link(feature.properties['leisure'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['toilets_di'] !== null ? autolinker.link(feature.properties['toilets_di'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['building'] !== null ? autolinker.link(feature.properties['building'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['operator'] !== null ? autolinker.link(feature.properties['operator'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['capacity'] !== null ? autolinker.link(feature.properties['capacity'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['health_f_1'] !== null ? autolinker.link(feature.properties['health_f_1'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['addr_stree'] !== null ? autolinker.link(feature.properties['addr_stree'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['toilets_ha'] !== null ? autolinker.link(feature.properties['toilets_ha'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['health_f_2'] !== null ? autolinker.link(feature.properties['health_f_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['military'] !== null ? autolinker.link(feature.properties['military'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['shop'] !== null ? autolinker.link(feature.properties['shop'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['medical_sy'] !== null ? autolinker.link(feature.properties['medical_sy'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['addr_house'] !== null ? autolinker.link(feature.properties['addr_house'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['religion'] !== null ? autolinker.link(feature.properties['religion'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5_0() {
+            return {
+                pane: 'pane_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(183,72,75,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5');
+        map.getPane('pane_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5').style.zIndex = 405;
+        map.getPane('pane_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5').style['mix-blend-mode'] = 'normal';
+        var layer_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5 = new L.geoJson(json_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5',
+            layerName: 'layer_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5',
+            pane: 'pane_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5',
+            onEachFeature: pop_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5,
+            style: style_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5_0,
+        });
+        bounds_group.addLayer(layer_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5);
+        map.addLayer(layer_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5);
+        function pop_JALANDESA_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama Jalan'] !== null ? autolinker.link(feature.properties['Nama Jalan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_JALANDESA_6_0() {
+            return {
+                pane: 'pane_JALANDESA_6',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 12.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        function style_JALANDESA_6_1() {
+            return {
+                pane: 'pane_JALANDESA_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 10.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_JALANDESA_6');
+        map.getPane('pane_JALANDESA_6').style.zIndex = 406;
+        map.getPane('pane_JALANDESA_6').style['mix-blend-mode'] = 'normal';
+        var layer_JALANDESA_6 = new L.geoJson.multiStyle(json_JALANDESA_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_JALANDESA_6',
+            layerName: 'layer_JALANDESA_6',
+            pane: 'pane_JALANDESA_6',
+            onEachFeature: pop_JALANDESA_6,
+            styles: [style_JALANDESA_6_0,style_JALANDESA_6_1,]
+        });
+        bounds_group.addLayer(layer_JALANDESA_6);
+        map.addLayer(layer_JALANDESA_6);
+        function pop_Kantor_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Kantor_7_0() {
+            return {
+                pane: 'pane_Kantor_7',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/Kantor_7.svg',
+            iconSize: [28.12, 28.12]
+        }),
+                interactive: true,
+            }
+        }
+        function style_Kantor_7_1() {
+            return {
+                pane: 'pane_Kantor_7',
+                radius: 3.2374999999999994,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(32,38,48,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Kantor_7');
+        map.getPane('pane_Kantor_7').style.zIndex = 407;
+        map.getPane('pane_Kantor_7').style['mix-blend-mode'] = 'normal';
+        var layer_Kantor_7 = new L.geoJson.multiStyle(json_Kantor_7, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Kantor_7',
+            layerName: 'layer_Kantor_7',
+            pane: 'pane_Kantor_7',
+            onEachFeature: pop_Kantor_7,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Kantor_7_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Kantor_7_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_Kantor_7);
+        map.addLayer(layer_Kantor_7);
+        function pop_Pendidikan_8(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Pendidikan_8_0() {
+            return {
+                pane: 'pane_Pendidikan_8',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/Pendidikan_8.svg',
+            iconSize: [27.17, 27.17]
+        }),
+                interactive: true,
+            }
+        }
+        function style_Pendidikan_8_1() {
+            return {
+                pane: 'pane_Pendidikan_8',
+        rotationAngle: 0.6457721000000001,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/Pendidikan_8.svg',
+            iconSize: [29.639999999999997, 29.639999999999997]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Pendidikan_8');
+        map.getPane('pane_Pendidikan_8').style.zIndex = 408;
+        map.getPane('pane_Pendidikan_8').style['mix-blend-mode'] = 'normal';
+        var layer_Pendidikan_8 = new L.geoJson.multiStyle(json_Pendidikan_8, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Pendidikan_8',
+            layerName: 'layer_Pendidikan_8',
+            pane: 'pane_Pendidikan_8',
+            onEachFeature: pop_Pendidikan_8,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_Pendidikan_8_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_Pendidikan_8_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_Pendidikan_8);
+        map.addLayer(layer_Pendidikan_8);
+        function pop_RumahKetua_9(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama Rt'] !== null ? autolinker.link(feature.properties['Nama Rt'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_RumahKetua_9_0() {
+            return {
+                pane: 'pane_RumahKetua_9',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/RumahKetua_9.svg',
+            iconSize: [38.0, 38.0]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_RumahKetua_9');
+        map.getPane('pane_RumahKetua_9').style.zIndex = 409;
+        map.getPane('pane_RumahKetua_9').style['mix-blend-mode'] = 'normal';
+        var layer_RumahKetua_9 = new L.geoJson(json_RumahKetua_9, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_RumahKetua_9',
+            layerName: 'layer_RumahKetua_9',
+            pane: 'pane_RumahKetua_9',
+            onEachFeature: pop_RumahKetua_9,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_RumahKetua_9_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_RumahKetua_9);
+        map.addLayer(layer_RumahKetua_9);
+        function pop_Rumah_10(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Rumah_10_0() {
+            return {
+                pane: 'pane_Rumah_10',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/Rumah_10.svg',
+            iconSize: [30.40000000000002, 30.40000000000002]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Rumah_10');
+        map.getPane('pane_Rumah_10').style.zIndex = 410;
+        map.getPane('pane_Rumah_10').style['mix-blend-mode'] = 'normal';
+        var layer_Rumah_10 = new L.geoJson(json_Rumah_10, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Rumah_10',
+            layerName: 'layer_Rumah_10',
+            pane: 'pane_Rumah_10',
+            onEachFeature: pop_Rumah_10,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_Rumah_10_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Rumah_10);
+        map.addLayer(layer_Rumah_10);
+        function pop_Kesehatan_11(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Kesehatan_11_0() {
+            return {
+                pane: 'pane_Kesehatan_11',
+                radius: 12.0,
+                opacity: 1,
+                color: 'rgba(227,26,28,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,255,1.0)',
+                interactive: true,
+            }
+        }
+        function style_Kesehatan_11_1() {
+            return {
+                pane: 'pane_Kesehatan_11',
+                radius: 6.923076923076925,
+                opacity: 1,
+                color: 'rgba(227,26,28,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,26,28,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Kesehatan_11');
+        map.getPane('pane_Kesehatan_11').style.zIndex = 411;
+        map.getPane('pane_Kesehatan_11').style['mix-blend-mode'] = 'normal';
+        var layer_Kesehatan_11 = new L.geoJson.multiStyle(json_Kesehatan_11, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Kesehatan_11',
+            layerName: 'layer_Kesehatan_11',
+            pane: 'pane_Kesehatan_11',
+            onEachFeature: pop_Kesehatan_11,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_Kesehatan_11_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_Kesehatan_11_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_Kesehatan_11);
+        map.addLayer(layer_Kesehatan_11);
+        function pop_TempatIbadah_12(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_TempatIbadah_12_0() {
+            return {
+                pane: 'pane_TempatIbadah_12',
+        rotationAngle: -0.0174533,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/TempatIbadah_12.svg',
+            iconSize: [28.12, 28.12]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_TempatIbadah_12');
+        map.getPane('pane_TempatIbadah_12').style.zIndex = 412;
+        map.getPane('pane_TempatIbadah_12').style['mix-blend-mode'] = 'normal';
+        var layer_TempatIbadah_12 = new L.geoJson(json_TempatIbadah_12, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_TempatIbadah_12',
+            layerName: 'layer_TempatIbadah_12',
+            pane: 'pane_TempatIbadah_12',
+            onEachFeature: pop_TempatIbadah_12,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_TempatIbadah_12_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_TempatIbadah_12);
+        map.addLayer(layer_TempatIbadah_12);
+        var overlaysTree = [
+            {label: '<img src="legend/TempatIbadah_12.png" /> Tempat Ibadah', layer: layer_TempatIbadah_12},
+            {label: '<img src="legend/Kesehatan_11.png" /> Kesehatan', layer: layer_Kesehatan_11},
+            {label: '<img src="legend/Rumah_10.png" /> Rumah', layer: layer_Rumah_10},
+            {label: '<img src="legend/RumahKetua_9.png" /> Rumah Ketua', layer: layer_RumahKetua_9},
+            {label: '<img src="legend/Pendidikan_8.png" /> Pendidikan', layer: layer_Pendidikan_8},
+            {label: '<img src="legend/Kantor_7.png" /> Kantor', layer: layer_Kantor_7},
+            {label: '<img src="legend/JALANDESA_6.png" /> JALAN DESA', layer: layer_JALANDESA_6},
+            {label: '<img src="legend/Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5.png" /> Desa_Sawangan_shp_uid_41532535-c523-4399-992e-5e35e0f6cbe7 — Desa_Sawangan_poly.shp', layer: layer_Desa_Sawangan_shp_uid_41532535c5234399992e5e35e0f6cbe7Desa_Sawangan_polyshp_5},
+            {label: 'BATAS DESA<br /><table><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW100.png" /></td><td>RW 10</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW021.png" /></td><td>RW 02</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW032.png" /></td><td>RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW043.png" /></td><td>RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW054.png" /></td><td>RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW065.png" /></td><td>RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW076.png" /></td><td>RW 07</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW087.png" /></td><td>RW 08</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW098.png" /></td><td>RW 09</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW109.png" /></td><td>RW 10</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW1110.png" /></td><td>RW 11</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_RW1211.png" /></td><td>RW 12</td></tr><tr><td style="text-align: center;"><img src="legend/BATASDESA_4_12.png" /></td><td></td></tr></table>', layer: layer_BATASDESA_4},
+            {label: 'BATAS RW<br /><table><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT05RW010.png" /></td><td>RT 05 RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW051.png" /></td><td>RT 04 RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW012.png" /></td><td>RT 04 RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW053.png" /></td><td>RT 03 RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW014.png" /></td><td>RT 03 RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW055.png" /></td><td>RT 02 RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW016.png" /></td><td>RT 02 RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW057.png" /></td><td>RT 01 RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW018.png" /></td><td>RT 01 RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_9.png" /></td><td></td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_10.png" /></td><td></td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW0211.png" /></td><td>RT 01 RW 02</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW0312.png" /></td><td>RT 01 RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW0413.png" /></td><td>RT 01 RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW0614.png" /></td><td>RT 01 RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW0715.png" /></td><td>RT 01 RW 07</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW0816.png" /></td><td>RT 01 RW 08</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW0917.png" /></td><td>RT 01 RW 09</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW1018.png" /></td><td>RT 01 RW 10</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW1119.png" /></td><td>RT 01 RW 11</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT01RW1220.png" /></td><td>RT 01 RW 12</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW0221.png" /></td><td>RT 02 RW 02</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW0322.png" /></td><td>RT 02 RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW0423.png" /></td><td>RT 02 RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW0624.png" /></td><td>RT 02 RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW0725.png" /></td><td>RT 02 RW 07</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW0826.png" /></td><td>RT 02 RW 08</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW0927.png" /></td><td>RT 02 RW 09</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW1028.png" /></td><td>RT 02 RW 10</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW1129.png" /></td><td>RT 02 RW 11</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT02RW1230.png" /></td><td>RT 02 RW 12</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW0231.png" /></td><td>RT 03 RW 02</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW0332.png" /></td><td>RT 03 RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW0433.png" /></td><td>RT 03 RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW0634.png" /></td><td>RT 03 RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW0735.png" /></td><td>RT 03 RW 07</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW0836.png" /></td><td>RT 03 RW 08</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW0937.png" /></td><td>RT 03 RW 09</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW1038.png" /></td><td>RT 03 RW 10</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW1139.png" /></td><td>RT 03 RW 11</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT03RW1240.png" /></td><td>RT 03 RW 12</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW0241.png" /></td><td>RT 04 RW 02</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW0342.png" /></td><td>RT 04 RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW0443.png" /></td><td>RT 04 RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW0644.png" /></td><td>RT 04 RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW0745.png" /></td><td>RT 04 RW 07</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW0846.png" /></td><td>RT 04 RW 08</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW0947.png" /></td><td>RT 04 RW 09</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT04RW1248.png" /></td><td>RT 04 RW 12</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT05RW0249.png" /></td><td>RT 05 RW 02</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT05RW0350.png" /></td><td>RT 05 RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT05RW0451.png" /></td><td>RT 05 RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_RT05RW1252.png" /></td><td>RT 05 RW 12</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_153.png" /></td><td>1</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_254.png" /></td><td>2</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_355.png" /></td><td>3</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_456.png" /></td><td>4</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_557.png" /></td><td>5</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_658.png" /></td><td>6</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_759.png" /></td><td>7</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_860.png" /></td><td>8</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_961.png" /></td><td>9</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1062.png" /></td><td>10</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1163.png" /></td><td>11</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1264.png" /></td><td>12</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1365.png" /></td><td>13</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1466.png" /></td><td>14</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1567.png" /></td><td>15</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1668.png" /></td><td>16</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1769.png" /></td><td>17</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1870.png" /></td><td>18</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_1971.png" /></td><td>19</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2072.png" /></td><td>20</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2173.png" /></td><td>21</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2274.png" /></td><td>22</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2375.png" /></td><td>23</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2476.png" /></td><td>24</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2577.png" /></td><td>25</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2678.png" /></td><td>26</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2779.png" /></td><td>27</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2880.png" /></td><td>28</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_2981.png" /></td><td>29</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3082.png" /></td><td>30</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3183.png" /></td><td>31</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3284.png" /></td><td>32</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3385.png" /></td><td>33</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3486.png" /></td><td>34</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3587.png" /></td><td>35</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3688.png" /></td><td>36</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3789.png" /></td><td>37</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3890.png" /></td><td>38</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_3991.png" /></td><td>39</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_4092.png" /></td><td>40</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_4193.png" /></td><td>41</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_4294.png" /></td><td>42</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_4395.png" /></td><td>43</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_4496.png" /></td><td>44</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_4597.png" /></td><td>45</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_4698.png" /></td><td>46</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_4799.png" /></td><td>47</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_48100.png" /></td><td>48</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_49101.png" /></td><td>49</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_50102.png" /></td><td>50</td></tr><tr><td style="text-align: center;"><img src="legend/BATASRW_3_51103.png" /></td><td>51</td></tr></table>', layer: layer_BATASRW_3},
+            {label: '<img src="legend/Persawahan_2.png" /> Persawahan', layer: layer_Persawahan_2},
+            {label: '<img src="legend/Hutan_1.png" /> Hutan', layer: layer_Hutan_1},
+            {label: 'ADMINISTRASIDESA_AR_25K<br /><table><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_0_Sawangan0.png" /></td><td>Sawangan</td></tr></table>', layer: layer_ADMINISTRASIDESA_AR_25K_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        var i = 0;
+        layer_ADMINISTRASIDESA_AR_25K_0.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['NAMOBJ'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['NAMOBJ']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_ADMINISTRASIDESA_AR_25K_0'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_Hutan_1.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Hutan'] !== null?String('<div style="color: #323232; font-size: 15pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['Hutan']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Hutan_1'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_Persawahan_2.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Sawah'] !== null?String('<div style="color: #323232; font-size: 20pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['Sawah']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Persawahan_2'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_BATASRW_3.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['RT'] !== null?String('<div style="color: #323232; font-size: 10pt; font-weight: bold; font-family: \'MS Shell Dlg 2\', sans-serif;">' + layer.feature.properties['RT']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_BATASRW_3'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_BATASDESA_4.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['RW'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['RW']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_BATASDESA_4'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_JALANDESA_6.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Nama Jalan'] !== null?String('<div style="color: #323232; font-size: 9pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['Nama Jalan']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_JALANDESA_6'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_Kantor_7.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Nama'] !== null?String('<div style="color: #323232; font-size: 13pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['Nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Kantor_7'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_Pendidikan_8.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Nama'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['Nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Pendidikan_8'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_RumahKetua_9.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Nama Rt'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['Nama Rt']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_RumahKetua_9'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_Rumah_10.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Nama'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['Nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Rumah_10'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_Kesehatan_11.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Nama'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'MS Serif\', sans-serif;">' + layer.feature.properties['Nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Kesehatan_11'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_TempatIbadah_12.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Nama'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['Nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_TempatIbadah_12'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        map.addControl(new L.Control.Search({
+            layer: layer_BATASRW_3,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'id'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        resetLabels([layer_ADMINISTRASIDESA_AR_25K_0,layer_Hutan_1,layer_Persawahan_2,layer_BATASRW_3,layer_BATASDESA_4,layer_JALANDESA_6,layer_Kantor_7,layer_Pendidikan_8,layer_RumahKetua_9,layer_Rumah_10,layer_Kesehatan_11,layer_TempatIbadah_12]);
+        map.on("zoomend", function(){
+            resetLabels([layer_ADMINISTRASIDESA_AR_25K_0,layer_Hutan_1,layer_Persawahan_2,layer_BATASRW_3,layer_BATASDESA_4,layer_JALANDESA_6,layer_Kantor_7,layer_Pendidikan_8,layer_RumahKetua_9,layer_Rumah_10,layer_Kesehatan_11,layer_TempatIbadah_12]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_ADMINISTRASIDESA_AR_25K_0,layer_Hutan_1,layer_Persawahan_2,layer_BATASRW_3,layer_BATASDESA_4,layer_JALANDESA_6,layer_Kantor_7,layer_Pendidikan_8,layer_RumahKetua_9,layer_Rumah_10,layer_Kesehatan_11,layer_TempatIbadah_12]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_ADMINISTRASIDESA_AR_25K_0,layer_Hutan_1,layer_Persawahan_2,layer_BATASRW_3,layer_BATASDESA_4,layer_JALANDESA_6,layer_Kantor_7,layer_Pendidikan_8,layer_RumahKetua_9,layer_Rumah_10,layer_Kesehatan_11,layer_TempatIbadah_12]);
+        });
+        </script>
+    </body>
+</html>
